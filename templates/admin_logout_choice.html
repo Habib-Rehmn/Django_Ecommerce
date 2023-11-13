@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+    <h2>Admin Logout Choice</h2>
+    <p>You are trying to access customer functionality. Do you want to log out as an admin?</p>
+    <form method="post" action="{% url 'admin_logout_choice' %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <button type="submit" name="logout" class="btn btn-primary">Log Out</button>
+      <a href="{% url 'admin:index' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

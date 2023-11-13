@@ -1,0 +1,39 @@
+<!-- customer_orders.html -->
+<h1>Your Orders</h1>
+<table>
+    {% for order_detail in order_details %}
+    <tr>
+        <th>Order ID</th>
+        <th>Order Date</th>
+        <th>Total Price</th>
+        <th>Status</th>
+        <!-- Add more columns for order details as needed -->
+    </tr>
+    <tr>
+        <td>{{ order_detail.order_id }}</td>
+        <td>{{ order_detail.order_date }}</td>
+        <td>{{ order_detail.total_price }}</td>
+        <td>{{ order_detail.status }}</td>
+        <!-- Add more columns for order details as needed -->
+    </tr>
+    <tr>
+        <td colspan="4">Ordered Products:</td>
+    </tr>
+    <tr>
+        <th>Product Name</th>
+        <th>Product Image</th>
+        <th>Unit Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+    </tr>
+    {% for item in order_detail.order_items %}
+    <tr>
+        <td>{{ item.name }}</td>
+        <td><img src="{{ item.image_url }}" width="50" height="50" /></td>
+        <td>{{ item.price }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.subtotal }}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+</table>

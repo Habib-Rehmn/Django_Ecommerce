@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrahead %}
+  <script src="{% static 'jquery.min.js' %}"></script>
+  <script src="{% static 'admin/js/jquery.init.js' %}"></script>
+  <script src="{% static 'admin/js/actions.js' %}"></script>
+  {{ block.super }}
+{% endblock %}
+
+
+

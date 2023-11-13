@@ -1,0 +1,23 @@
+<!-- customer_signup.html -->
+
+{% extends "account/signup.html" %}
+
+{% block content %}
+  <h2>Sign up</h2>
+  <form method="post" class="signup">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Sign up</button>
+  </form>
+  {% load socialaccount %}
+<a href="{% provider_login_url 'google' %}">Sign Up with Google</a>
+
+<h4>Already have an account?</h4>
+<a href="login">Login</a>
+{% endblock %}
+
+
+
+
+
+

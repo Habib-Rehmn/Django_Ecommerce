@@ -1,0 +1,21 @@
+{% extends "account/login.html" %}
+
+{% block content %}
+{% load socialaccount %}
+
+  <h2>Customer Login</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Log In</button>
+  </form>
+  <a href="{% provider_login_url 'google' %}">Log in with Google</a>
+
+  <h4>Dont have an account?</h4>
+  <a href="">SignUp</a>
+
+  <a class="#" href="{% url 'account_reset_password' %}">Forgot Password?</a>
+
+{% endblock %}
+
+

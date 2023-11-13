@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  {% load custom_filters %}
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/search.css' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" integrity="sha512-uKQ39gEGiyUJl4AI6L+ekBdGKpGw4xJ55+xyJG7YFlJokPNYegn9KwQ3P8A7aFQAUtUsAQHep+d/lrGqrbPIDQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <title>Online Emporium</title>
+
+</head>
+
+
+<body>
+
+  <div class="head">
+  <header class="header">
+
+    <div class="logo">
+      <img src="{% static 'logo.png' %}" alt="Logo">
+    </div>
+    <div class="search-bar">
+      <form action="{% url 'search' %}" method="get">
+        <input type="text" name="q" placeholder="Search..." {% if query %} value="{{ query }}" {% else %} value="" {% endif %}>
+        <button type="submit"><i class="fas fa-search" style="color: #ffffff;"></i></button>
+      </form>
+    </div>      
+    <div class="links">
+      <a href="#cart" class="header-link" id="cart-link">Cart</a>
+      <a href="#login" class="header-link" id="login-link">Login</a>
+      <a href="#contact" class="header-link" id="contact-link">Contact Us</a>
+      <a href="#shop" class="header-link" id="shop-link">Shop</a>
+    </div>
+
+  </header>
+  </div>
+
+        
+
+    <div class="filter-column">
+
+
+        <!-- Price Range Filter -->
+        <div class="filter-category">
+          <form action="{% url 'search' %}" method="get" id="priceFilterForm">
+            <input type="hidden" name="q" value="{{ request.GET.q }}">
+            <h4>Price Range</h4>
+            <label for="minPrice">Min Price:</label>
+            <input type="text" id="minPrice" name="minPrice" placeholder="{{ min_price }}">
+            <label for="maxPrice">Max Price:</label>
+            <input type="text" id="maxPrice" name="maxPrice" placeholder="{{ max_price }}">
+            {% if min_price and max_price %} 
+            {{ min_price }} - {{ max_price }} 
+            {% else %}
+            <p>Price: <span id="priceValue"></span></p>
+            {% endif %}
+            <button type="submit" onclick="return validateForm()">Apply</button>
+        </form>
+        
+        </div>
+
+        
+      <form action="{% url 'search' %}" method="get" id="filters-form">
+        <input type="hidden" name="q" value="{{ request.GET.q }}">
+      
+        <!-- Ratings Filter with Five Stars -->
+        <div class="filter-category">
+          <h4>Ratings</h4>
+          <input type="checkbox" id="rating1" name="rating" value="1">
+          <label for="rating1">
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+          </label>
+          <input type="checkbox" id="rating2" name="rating" value="2">
+          <label for="rating2">
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+          </label>
+          <input type="checkbox" id="rating3" name="rating" value="3">
+          <label for="rating3">
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+          </label>
+          <input type="checkbox" id="rating4" name="rating" value="4">
+          <label for="rating4">
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+          </label>
+          <input type="checkbox" id="rating5" name="rating" value="5">
+          <label for="rating5">
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+          </label>
+        </div>
+
+        <!-- Shipping Filter -->
+        <div class="filter-category">
+          <h4>Shipping</h4>
+          <input type="checkbox" id="freeShipping" name="shipping" value="free">
+          <label for="freeShipping">Free Shipping</label>
+          <input type="checkbox" id="shippingFee" name="shipping" value="fee">
+          <label for="shippingFee">Paid Shipping</label>
+        </div>
+
+        <!-- Brand Filter (Dynamically generated checkboxes) -->
+        <div class="filter-category" id="brandFilter">
+          <h4>Brand</h4>
+          <!-- Brand checkboxes will be added here dynamically using JavaScript -->
+        </div>
+
+        
+      
+      <div class="specific">
+        
+        <div class="filters-container">
+          {% for attribute_name, attribute_values in attribute_values_dict.items %}
+              <div class="filter-category">
+                  <h4>{{ attribute_name }}</h4>
+                  {% for attribute_value in attribute_values %}
+                      <input type="checkbox" id="{{ attribute_name|slugify }}{{ attribute_value|slugify }}" name="{{ attribute_name }}" value="{{ attribute_value }}">
+                      <label for="{{ attribute_name|slugify }}{{ attribute_value|slugify }}">{{ attribute_value }}</label>
+                  {% endfor %}
+              </div>
+          {% endfor %}
+        </div>
+
+      </div>
+      </form>
+    </div>
+        
+
+  <div class="product-page">
+    <div class="sorting-options" >
+
+      <form method="get" action="{% url 'search' %}">
+        <input type="hidden" name="q" value="{{ request.GET.q }}">
+        <label for="id_sort_by">Sort By Best Match:</label>
+        <select id="id_sort_by" name="sort_by">
+          <option value="price_asc">Price (Low to High)</option>
+          <option value="price_desc">Price (High to Low)</option>
+          <option value="ratings_desc">Ratings (High to Low)</option>
+          <option value="latest">Latest</option>
+        </select>
+        <button type="submit">Sort</button>
+      </form>
+        
+    </div>
+  <div class="product-list">
+
+    
+    {% if results %}
+    {% for product in results %}
+
+    <div class="product-card">
+
+      <div class="product-image">
+      <div class="like">
+        <i class="fa-regular fa-heart" style="color: #2f79f9;"></i>
+      </div>
+      <a href="{% url 'product_detail' product.id %}">
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+      </a>
+      </div>
+
+      <div class="product-details">
+        <h6>{{ product.name }}</h6>
+        <p class="product-price">Rs. {{ product.price }}</p>
+        <div class="ratings">
+          {% for _ in product.ratings|range_filter %}
+            <i class="fa-solid fa-star" style="color: #fff714;"></i>
+          {% endfor %}
+          {% for _ in product.ratings|empty_star_count|range_filter %}
+            <i class="fa-regular fa-star" style="color: #ffdf0f;"></i>
+          {% endfor %}
+        </div>
+        <button class="add-to-cart" onclick="addToCart({{ product.id }})">Add to Cart</button>
+      </div>
+    </div>
+
+    {% endfor %}
+    {% else %}
+    <p>No results found for "{{ query }}".</p>
+    {% endif %}
+    
+  </div>
+  <div class="pagination">
+    <span class="arrow">
+        {% if results.has_previous %}
+            <a href="?{{ request.GET.urlencode }}&page={{ results.previous_page_number }}">&lt;</a>
+        {% else %}
+            <span class="disabled">&lt;</span>
+        {% endif %}
+    </span>
+
+    <span class="page-numbers">
+        {% for page_num in results.paginator.page_range %}
+            <a href="?{{ request.GET.urlencode }}&page={{ page_num }}">{{ page_num }}</a>
+        {% endfor %}
+    </span>
+
+    <span class="arrow">
+        {% if results.has_next %}
+            <a href="?{{ request.GET.urlencode }}&page={{ results.next_page_number }}">&gt;</a>
+        {% endif %}
+    </span>
+</div>
+
+  </div>
+ 
+
+  <div class="foot">
+  <footer class="footer">
+
+    <div class="footer-logo">
+      <img src="{% static 'logo.png' %}" alt="Footer Logo">
+    </div>
+    <div class="footer-links">
+      <a href="#">Home</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <a href="#">Privacy Policy</a>
+    </div>
+
+  </footer>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log("script is working");
+      // Assuming you have a variable 'brands' containing the brand names passed from the view
+      const brands = {{ brands | safe }};
+      console.log(brands);
+  
+      // Get the container element for brand filters
+      const brandFilterContainer = document.getElementById('brandFilter');
+  
+      // Iterate through the brands and create checkboxes dynamically
+      brands.forEach((brand) => {
+        const brandLabel = document.createElement("label");
+        brandLabel.innerHTML = `
+          <input type="checkbox" name="brand" value="${brand}">
+          ${brand}
+        `;
+  
+        // Add event listener to each dynamically created checkbox
+        const brandCheckbox = brandLabel.querySelector('input[type="checkbox"]');
+        brandCheckbox.addEventListener('change', () => {
+          // Trigger form submission when a brand checkbox is changed
+          document.getElementById('filters-form').submit();
+        });
+  
+        brandFilterContainer.appendChild(brandLabel);
+      });
+    });
+  </script>
+
+<script>
+    // Get references to the input elements and the price display
+    console.log("price script is running");
+    const minPriceInput = document.getElementById("minPrice");
+    const maxPriceInput = document.getElementById("maxPrice");
+    const priceValue = document.getElementById("priceValue");
+
+    // Set initial values for the inputs and display
+    minPriceInput.value = "";
+    maxPriceInput.value = "";
+    priceValue.textContent = "";
+
+    // Function to update the price display
+    function updatePrice() {
+        const minPrice = minPriceInput.value || 0;
+        const maxPrice = maxPriceInput.value || 0;
+        priceValue.textContent = `${minPrice} - ${maxPrice}`;
+    }
+
+    // Add input event listeners to min and max price inputs
+    minPriceInput.addEventListener("input", updatePrice);
+    maxPriceInput.addEventListener("input", updatePrice);
+
+    // Update the price initially
+    updatePrice();
+</script>
+
+<script>
+  function validateForm() {
+      // Get the values of minPrice and maxPrice inputs
+      var minPriceValue = document.getElementById('minPrice').value.trim();
+      var maxPriceValue = document.getElementById('maxPrice').value.trim();
+
+      // Check if both inputs are empty
+      if (minPriceValue === '' && maxPriceValue === '') {
+          alert('Please enter either minimum or maximum prices.');
+          return false; // Prevent form submission
+      }
+
+      // If validation passes, allow the form to submit
+      return true;
+  }
+</script>
+
+<script>
+  // Get the form element
+  const filtersForm = document.getElementById('filters-form');
+
+  // Add event listeners to checkboxes and their labels
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      // Trigger form submission
+      filtersForm.submit();
+    });
+  });
+
+</script>
+
+<script>
+  // Function to parse URL parameters into an object
+  function getUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const params = {};
+    for (const [name, value] of urlParams) {
+      if (!params[name]) {
+        params[name] = [];
+      }
+      params[name].push(value);
+    }
+    return params;
+    console.log(params)
+  }
+
+  // Function to pre-check checkboxes based on URL parameters
+  function preCheckCheckboxes() {
+    const checkboxes1 = document.querySelectorAll('input[type="checkbox"]');
+    const urlParams = getUrlParameters();
+
+    checkboxes1.forEach(checkbox => {
+      const checkboxName = checkbox.getAttribute('name');
+      const checkboxValue = checkbox.getAttribute('value');
+
+      if (urlParams[checkboxName] && urlParams[checkboxName].includes(checkboxValue)) {
+        checkbox.checked = true;
+      }
+    });
+  }
+
+  // Add an event listener to run the preCheckCheckboxes function when the DOM is fully loaded
+  document.addEventListener('DOMContentLoaded', preCheckCheckboxes);
+
+  // Add event listeners to checkboxes
+  const filtersForm1 = document.getElementById('filters-form');
+  const checkboxes1 = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes1.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      // Trigger form submission
+      filtersForm1.submit();
+    });
+  });
+</script>
+
+<script>
+  function addToCart(productId) {
+      $.ajax({
+          type: 'GET',
+          url: `/add_to_cart/${productId}/`,
+          success: function(data) {
+              // Handle success, e.g., show a success message
+          },
+          error: function() {
+              // Handle errors, e.g., show an error message
+          }
+      });
+
+      const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+      if(!isAuthenticated){
+        window.location.href = '/accounts/customer/login/';
+      }
+  }
+  </script>
+  
+
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" integrity="sha512-uKQ39gEGiyUJl4AI6L+ekBdGKpGw4xJ55+xyJG7YFlJokPNYegn9KwQ3P8A7aFQAUtUsAQHep+d/lrGqrbPIDQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>
+    
+    

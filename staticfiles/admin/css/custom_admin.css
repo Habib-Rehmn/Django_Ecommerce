@@ -1,0 +1,12 @@
+/* Add your custom CSS styles here */
+.ordered-products-table {
+    width: 100%;
+}
+
+.product-row.even {
+    background-color: #fa5f5f;
+}
+
+.product-row.odd {
+    background-color: #ff6868;
+}

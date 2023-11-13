@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout</title>
+</head>
+<body>
+    <h1>Checkout</h1>
+    <form method="post" action="{% url 'checkout' %}">
+        {% csrf_token %}
+        <ul>
+            {% for cart_item in cart.cart_items.all %}
+            <li>
+                {{ cart_item.product.name }} x {{ cart_item.quantity }}
+            </li>
+            {% endfor %}
+        </ul>
+        <p>Total Price: ${{ total_price }}</p>
+        <label for="coupon_code">Coupon Code:</label>
+        <input type="text" name="coupon_code" id="coupon_code">
+        <input type="submit" value="Order">
+    </form>
+    {% if coupon_error %}
+    <h4>{{coupon_error}}</h4>
+    {% endif %}
+
+
+</body>
+</html>
