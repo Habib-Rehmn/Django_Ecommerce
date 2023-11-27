@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'sslserver',
+    "djstripe",
 ]
 
 MIDDLEWARE = [
@@ -227,3 +228,13 @@ AUTHENTICATION_CLASSES = (
 )
 
 
+
+STRIPE_PUBLIC_KEY = 'pk_test_51OAs16BcjQz7F5SUB4a1hisXJfrs9Q4hqulsKzSdOSFPq0RNv1butFhJocIbojZWMINQRbzC34fbKzrX094kq2HD00g17amJs5'
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51OAs16BcjQz7F5SUB4a1hisXJfrs9Q4hqulsKzSdOSFPq0RNv1butFhJocIbojZWMINQRbzC34fbKzrX094kq2HD00g17amJs5'
+STRIPE_SECRET_KEY = 'sk_test_51OAs16BcjQz7F5SUVrizDWZOgYVHHMULYJ6bdEnrYfb1ORh3D5KzDawXEq2CD7FMTkBsU3wAjGfne7CynaoGEDeb00ZSUkOzYc'
+
+
+STRIPE_TEST_SECRET_KEY = "sk_test_51OAs16BcjQz7F5SUVrizDWZOgYVHHMULYJ6bdEnrYfb1ORh3D5KzDawXEq2CD7FMTkBsU3wAjGfne7CynaoGEDeb00ZSUkOzYc"
+STRIPE_LIVE_MODE = False  # Change to True in production
+DJSTRIPE_WEBHOOK_SECRET = "whsec_B2s8G4mPvN33cMkz0UIsRoUjkBe0XR2M"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
+DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"

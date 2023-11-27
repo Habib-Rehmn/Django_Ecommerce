@@ -46,9 +46,9 @@ class CustomUser(AbstractUser):
     address = models.CharField(max_length=255, blank=True, null=True, default=None)
     phone_number = models.CharField(max_length=15, blank=True, null=True, default=None)
     city = models.CharField(max_length=30, blank=True, null=True, default=None)
-    province = models.CharField(max_length=30, blank=True, null=True, default=None)
     full_name = models.CharField(max_length=40, blank=True, null=True, default=None)
     profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
+    zip_code = models.CharField(max_length=10, blank=True, null=True, default=None)
     email = models.EmailField(blank=True)
     GENDER_CHOICES = [
         ('M', 'Male'),
@@ -99,6 +99,12 @@ class Order(models.Model):
     items = models.ManyToManyField(CartItem, through='OrderItem')
     total_price = models.DecimalField(max_digits=10, decimal_places=2)  # You can adjust the decimal places as needed
     order_date = models.DateTimeField(auto_now_add=True)
+    address = models.CharField(max_length=255, blank=True, null=True, default=None)
+    phone_number = models.CharField(max_length=15, blank=True, null=True, default=None)
+    city = models.CharField(max_length=30, blank=True, null=True, default=None)
+    full_name = models.CharField(max_length=40, blank=True, null=True, default=None)
+    zip_code = models.CharField(max_length=10, blank=True, null=True, default=None)
+    email = models.EmailField(blank=True)
     order_id = models.CharField(max_length=10, unique=True)
     # Define order status choices
     STATUS_CHOICES = (
@@ -106,10 +112,16 @@ class Order(models.Model):
         ('in_process', 'In Process'),
         ('completed', 'Completed'),
         ('canceled', 'Canceled'),
+        ('paid','Paid'),
     )
 
     # Add a status field to the Order model
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    PAYMENT_CHOICES = [
+        ('cash_on_delivery', 'Cash on Delivery'),
+        ('online_payment', 'Online Payment'),
+    ]
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='cash_on_delivery')
     ordered_products = models.ManyToManyField(Product, related_name='orders', blank=True)
     product_quantity = models.JSONField(null=True, blank=True)
     def generate_unique_order_id(self):

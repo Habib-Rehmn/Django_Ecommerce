@@ -5,6 +5,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 from Online_Emporium.views import customer_signup_view, customer_login_view
 from django.contrib import admin
+from djstripe import webhooks
+
+
+
 
 
 
@@ -35,7 +39,8 @@ urlpatterns = [
     path('update_cart/', views.update_cart, name='update_cart'),
     path('customer/orders/', views.customer_orders, name='customer_orders'),
 
-
+    path('payment/', views.payment_view, name='payment'),
+    path("stripe/", include("djstripe.urls", namespace="djstripe")),
     
 
 ]

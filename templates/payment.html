@@ -1,0 +1,144 @@
+<!-- payment.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #ecf0f5; /* Slightly bluish-white background */
+        }
+
+        #payment-form {
+            width: 400px;
+            padding: 20px;
+            background-color: #ffffff; /* White background for form elements */
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #3498db; /* Highlight border when in focus */
+        }
+
+        #card-element {
+            margin-bottom: 20px;
+        }
+
+        #submit-button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #submit-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div id="payment-form">
+        <h1>Payment Page</h1>
+        <label for="card-number">Card Number</label>
+        <div id="card-number">
+            <!-- Visa and MasterCard icons inside the card number input -->
+            <i class="fab fa-cc-visa"></i>
+            <i class="fab fa-cc-mastercard"></i>
+        </div>
+
+        <label for="card-expiry">Card Expiry</label>
+        <div id="card-expiry"></div>
+
+        <label for="card-cvc">Card CVC</label>
+        <div id="card-cvc"></div>
+
+        <label for="card-zip">Card ZIP</label>
+        <div id="card-zip"></div>
+
+        <button id="submit-button">Pay Now</button>
+    </div>
+
+    <script>
+        // Include your Stripe public key here
+        var stripe = Stripe('pk_test_51OAs16BcjQz7F5SUB4a1hisXJfrs9Q4hqulsKzSdOSFPq0RNv1butFhJocIbojZWMINQRbzC34fbKzrX094kq2HD00g17amJs5');
+        var elements = stripe.elements();
+
+        var style = {
+            base: {
+                fontSize: '16px',
+                color: '#32325d',
+            },
+        };
+
+        var cardNumber = elements.create('cardNumber', { style: style });
+        cardNumber.mount('#card-number');
+
+        var cardExpiry = elements.create('cardExpiry', { style: style });
+        cardExpiry.mount('#card-expiry');
+
+        var cardCvc = elements.create('cardCvc', { style: style });
+        cardCvc.mount('#card-cvc');
+
+        var cardZip = elements.create('postalCode', { style: style });
+        cardZip.mount('#card-zip');
+
+        var paymentButton = document.getElementById('submit-button');
+        paymentButton.addEventListener('click', function () {
+            stripe.confirmCardPayment(
+                '{{ client_secret }}',
+                {
+                    payment_method: {
+                        card: cardNumber,
+                        billing_details: {
+                            address: {
+                                postal_code: cardZip._postalCode,
+                            },
+                        },
+                    },
+                }
+            ).then(function (result) {
+                if (result.error) {
+                    // Show error to your customer
+                    console.error(result.error.message);
+                } else {
+                    // The payment succeeded
+                    window.location.href = '/payment/success/';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

@@ -74,17 +74,17 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = UserAdmin.fieldsets + (
         ('Custom Fields', {
-            'fields': ( 'address', 'phone_number', 'city', 'province', 'full_name', 'profile_image'),
+            'fields': ( 'address', 'phone_number', 'city', 'zip_code', 'full_name', 'profile_image'),
         }),
     )
-    readonly_fields = ( 'address', 'phone_number', 'city', 'province', 'full_name', 'profile_image')
+    readonly_fields = ( 'address', 'phone_number', 'city', 'zip_code', 'full_name', 'profile_image')
     add_fieldsets = UserAdmin.add_fieldsets + (
         (None, {
-            'fields': ('username', 'email',  'address', 'phone_number', 'city', 'province', 'full_name' , 'profile_image'),
+            'fields': ('username', 'email',  'address', 'phone_number', 'city', 'zip_code', 'full_name' , 'profile_image'),
         }),
     )
     
-    readonly_fields = ('username', 'email',  'address', 'phone_number', 'city', 'province', 'full_name' , 'profile_image', 'first_name', 'last_name')
+    readonly_fields = ('username', 'email',  'address', 'phone_number', 'city', 'zip_code', 'full_name' , 'profile_image', 'first_name', 'last_name')
 
     list_display = ('username', 'email', 'is_staff')
     search_fields = ('username', 'email', 'address', 'phone_number')
@@ -117,11 +117,10 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ('status',)
     fieldsets = (
         ('Order Details', {
-            'fields': ('order_id', 'user', 'status', 'display_ordered_products'),
+            'fields': ('order_id', 'user', 'status', 'display_ordered_products', 'payment_method','address', 'phone_number', 'city', 'full_name', 'zip_code', 'email'),
         }),
     )
-    readonly_fields = ('order_id', 'user', 'total_price', 'display_ordered_products')  # Set all fields to readonly
-
+    readonly_fields = ('order_id', 'user', 'total_price', 'display_ordered_products', 'payment_method','address', 'phone_number', 'city', 'full_name', 'zip_code', 'email')  
 
 
 

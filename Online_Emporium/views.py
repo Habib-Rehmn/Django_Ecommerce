@@ -31,6 +31,7 @@ from django.core.mail import send_mail
 
 
 
+
 def index(request):
     return render(request, 'index.html')
 
@@ -365,8 +366,9 @@ def get_cart_for_user(user):
 def checkout(request):
     cart = get_cart_for_user(request.user)
     total_price = cart.get_total_price()
+    request.session['total_price'] = total_price
     coupon_error = None  # Initialize coupon_error to None
-
+    default_address_user1 = CustomUser.objects.get(pk=request.user.pk)
     
     if request.method == 'POST':
         coupon_code = request.POST.get('coupon_code')
@@ -379,12 +381,53 @@ def checkout(request):
                 coupon_error = "Invalid coupon code. Please check and try again."
 
         if not coupon_error:  # If there is no coupon error, proceed to create the order
-            order = Order.objects.create(user=request.user, total_price=total_price)
-            # Calculate or retrieve the necessary context data here
+            address_option = request.POST.get('address_option')
+            if address_option == 'default':
+                # Get the default address from the CustomUser model
+                default_address_user = CustomUser.objects.get(pk=request.user.pk)
+                address = default_address_user.address
+                phone_number = default_address_user.phone_number
+                city = default_address_user.city
+                full_name = default_address_user.full_name
+                zip_code = default_address_user.zip_code
+                email = default_address_user.email
+            elif address_option == 'new':
+                # Get the new address from the form
+                address = request.POST.get('address')
+                phone_number = request.POST.get('phone_number')
+                city = request.POST.get('city')
+                full_name = request.POST.get('full_name')
+                zip_code = request.POST.get('zip_code')
+                email = request.POST.get('email')
             
-          
+                # Check if the "Make these details as default" checkbox is checked
+                make_default = request.POST.get('make_default') == 'on'
 
-
+                if make_default:
+                # Update the CustomUser model with the new address details
+                    custom_user = CustomUser.objects.get(pk=request.user.pk)
+                    custom_user.address = address
+                    custom_user.phone_number = phone_number
+                    custom_user.city = city
+                    custom_user.full_name = full_name
+                    custom_user.zip_code = zip_code
+                    custom_user.email = email
+                    custom_user.save() 
+                
+            payment_method = request.POST.get('payment_method')    
+                
+            order = Order.objects.create(
+            user=request.user,
+            total_price=total_price,
+            address=address,
+            phone_number=phone_number,
+            city=city,
+            full_name=full_name,
+            zip_code=zip_code,
+            email=email,
+            payment_method = payment_method,
+            )
+                
             
                 
             ordered_product_ids = []  # Initialize a list to store product IDs
@@ -401,6 +444,8 @@ def checkout(request):
             
             # Serialize the product quantity data to JSON and store it in the Order model
             order.product_quantity = json.dumps(product_quantity)
+            payment_method = request.POST.get('payment_method')
+            order.payment_method = payment_method
             order.save()
 
             # Clear the cart
@@ -422,12 +467,15 @@ def checkout(request):
                 fail_silently=False,
             )
 
-            # Redirect to the order confirmation page with a unique order ID.
-            return redirect('order_confirmation', order_id=order.id)
-        
-       
-
-    return render(request, 'checkout.html', {'cart': cart, 'total_price': total_price, 'coupon_error': coupon_error})
+            payment_method = request.POST.get('payment_method')
+            if payment_method == 'cash_on_delivery':
+                # Redirect to the order confirmation page with a unique order ID.
+                return redirect('order_confirmation', order_id=order.id)
+            elif payment_method == 'online_payment':
+                # Redirect to your online payment view.
+                return redirect('payment')
+            
+    return render(request, 'checkout.html', {'cart': cart, 'total_price': total_price, 'coupon_error': coupon_error, 'default_address' : default_address_user1 })
 
 
 
@@ -549,6 +597,66 @@ def customer_orders(request):
             })
 
     return render(request, 'customer_orders.html', {'order_details': order_details})
+
+
+
+
+# views.py
+
+from django.shortcuts import render
+from django.http import JsonResponse
+import stripe
+from django.conf import settings
+from djstripe.models import PaymentIntent
+
+def payment_view(request):
+    total_price = request.session.get('total_price')
+    
+    if not total_price:
+        # Handle the case where total_price is not set in the session
+        messages.error(request, "Total price is missing.")
+        return redirect('checkout')
+
+    try:
+        # Create a PaymentIntent
+        intent = stripe.PaymentIntent.create(
+            amount=int(total_price), 
+            currency='usd',
+            metadata={'integration_check': 'accept_a_payment'},
+        )
+        client_secret = intent.client_secret
+        
+        # Save the PaymentIntent in your database for later retrieval
+        PaymentIntent.sync_from_stripe_data(intent)
+        
+        if intent.status == 'succeeded':
+            pass
+        
+        context = {"client_secret": client_secret, "amount": total_price}
+
+        return redirect(request, 'payment.html', context)
+        
+
+    except stripe.error.StripeError as e:
+        return JsonResponse({"error": str(e)})
+
+
+
+# views.py
+
+from django.http import HttpResponse
+from djstripe import webhooks
+
+@webhooks.handler("payment_intent.succeeded")
+def payment_intent_succeeded(request, payload):
+    # Payment succeeded, handle accordingly
+    return HttpResponse(status=200)
+
+@webhooks.handler("payment_intent.payment_failed")
+def payment_intent_payment_failed(request, payload):
+    # Payment failed, handle accordingly
+    return HttpResponse(status=200)
+
 
 
 

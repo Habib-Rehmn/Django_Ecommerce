@@ -25,7 +25,7 @@ class CustomSignupForm1(SignupForm):
 class CustomerUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['full_name', 'address', 'phone_number', 'city', 'province', 'profile_image', 'gender']
+        fields = ['full_name', 'address', 'phone_number', 'city', 'zip_code', 'profile_image', 'gender']
 
     # You can add additional fields or validation as needed.
 

@@ -17,7 +17,113 @@
         <p>Total Price: ${{ total_price }}</p>
         <label for="coupon_code">Coupon Code:</label>
         <input type="text" name="coupon_code" id="coupon_code">
+
+        <label>Payment Method:</label>
+        <input type="radio" id="cash_on_delivery" name="payment_method" value="cash_on_delivery" required>
+        <label for="cash_on_delivery">Cash on Delivery</label>
+        
+        <input type="radio" id="online_payment" name="payment_method" value="online_payment" required>
+        <label for="online_payment">Online Payment</label>
+
+  
+        
+        <label>Address:</label>
+
+        <input type="radio" id="default_address" name="address_option" value="default" >
+        <label for="default_address">Fill in with default address</label>
+        
+        <input type="radio" id="new_address" name="address_option" value="new" checked>
+        <label for="new_address">Enter new address</label>
+        
+        <div id="defaultAddressFields" style="display: none;">
+            <!-- Fields filled by JavaScript with default address -->
+            <label for="address_1">Address:</label>
+            <p name="address_1" id="address_1"></p>
+
+            <label for="phone_number_1">Phone Number:</label>
+            <p name="phone_number_1" id="phone_number_1"></p>
+
+            <label for="city_1">City:</label>
+            <p name="city_1" id="city_1" required>
+
+            <label for="full_name_1">Full Name:</label>
+            <p name="full_name_1" id="full_name_1"></p>
+
+            <label for="zip_code_1">Zip Code:</label>
+            <p name="zip_code_1" id="zip_code_1"></p>
+
+            <label for="email_1">Email:</label>
+            <p name="email_1" id="email_1"></p>
+                
+        </div>
+        
+        <div id="newAddressFields">
+            <!-- Fields for the user to enter new address -->
+            <label for="address">Address:</label>
+            <input type="text" name="address" id="address" >
+
+            <label for="phone_number">Phone Number:</label>
+            <input type="text" name="phone_number" id="phone_number" >
+
+            <label for="city">City:</label>
+            <input type="text" name="city" id="city" >
+
+            <label for="full_name">Full Name:</label>
+            <input type="text" name="full_name" id="full_name" >
+
+            <label for="zip_code">Zip Code:</label>
+            <input type="text" name="zip_code" id="zip_code" >
+
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" >
+
+            <label for="make_default">Make these details as default:</label>
+            <input type="checkbox" id="make_default" name="make_default">
+        </div>
+
         <input type="submit" value="Order">
+        <!-- your existing code -->
+        
+        <script>
+            // JavaScript logic to fill in fields with default address based on user's choice
+            document.addEventListener("DOMContentLoaded", function () {
+                const defaultAddressFields = document.getElementById("defaultAddressFields");
+                const newAddressFields = document.getElementById("newAddressFields");
+        
+                const defaultAddressOption = document.getElementById("default_address");
+                const newAddressOption = document.getElementById("new_address");
+        
+                
+        
+                defaultAddressOption.addEventListener("change", function () {
+                    if (defaultAddressOption.checked) {
+                        defaultAddressFields.style.display = "block";
+                        newAddressFields.style.display = "none";
+        
+                        document.getElementById("address_1").textContent = "{{ default_address.address }}";
+                        document.getElementById("phone_number_1").textContent = "{{ default_address.phone_number }}";
+                        document.getElementById("city_1").textContent = "{{ default_address.city }}";
+                        document.getElementById("full_name_1").textContent = "{{ default_address.full_name }}";
+                        document.getElementById("zip_code_1").textContent = "{{ default_address.zip_code }}";
+                        document.getElementById("email_1").textContent = "{{ default_address.email }}";
+                    }
+                });
+        
+                newAddressOption.addEventListener("change", function () {
+                    if (newAddressOption.checked) {
+                        defaultAddressFields.style.display = "none";
+                        newAddressFields.style.display = "block";
+                    }
+                });
+                    // Trigger the change event initially to set the default state
+        defaultAddressOption.dispatchEvent(new Event("change"));
+                
+            });
+        </script>
+        
+
+
+
     </form>
     {% if coupon_error %}
     <h4>{{coupon_error}}</h4>
