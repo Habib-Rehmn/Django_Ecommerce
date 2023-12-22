@@ -35,12 +35,14 @@ urlpatterns = [
     path('remove_from_cart/<int:cart_item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('cart/', views.cart_view, name='cart_view'),
     path('checkout/', views.checkout, name='checkout'),
-    path('order_confirmation/<int:order_id>/', views.order_confirmation, name='order_confirmation'),
+    path('order_confirmation/', views.order_confirmation, name='order_confirmation'),
     path('update_cart/', views.update_cart, name='update_cart'),
     path('customer/orders/', views.customer_orders, name='customer_orders'),
 
     path('payment/', views.payment_view, name='payment'),
     path("stripe/", include("djstripe.urls", namespace="djstripe")),
+    path('payment/success/', views.success_view, name='payment_success'),
+
     
 
 ]

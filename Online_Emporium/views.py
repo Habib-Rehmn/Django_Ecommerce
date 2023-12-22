@@ -1,4 +1,5 @@
 from datetime import timedelta
+import time
 from django.utils import timezone
 from http.client import responses
 import json
@@ -27,7 +28,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import CustomerUpdateForm 
 from django.core.mail import send_mail
-
+from djstripe import webhooks
+from Online_Emporium.signals import payment_succeeded
+from .signals import payment_succeeded
 
 
 
@@ -414,64 +417,73 @@ def checkout(request):
                     custom_user.email = email
                     custom_user.save() 
                 
-            payment_method = request.POST.get('payment_method')    
-                
-            order = Order.objects.create(
-            user=request.user,
-            total_price=total_price,
-            address=address,
-            phone_number=phone_number,
-            city=city,
-            full_name=full_name,
-            zip_code=zip_code,
-            email=email,
-            payment_method = payment_method,
-            )
-                
+            payment_method = request.POST.get('payment_method')  
             
-                
-            ordered_product_ids = []  # Initialize a list to store product IDs
-            # Create a dictionary to store product quantity data
-            product_quantity = {}
-            for cart_item in cart.cart_items.all():
-                OrderItem.objects.create(order=order, cart_item=cart_item)
-                product_quan = cart_item.quantity
-                product_quantity[cart_item.product.id] = product_quan
-                ordered_product_ids.append(cart_item.product.id)  # Add the product ID to the list
-
-            # Set the ordered_products field of the order to the list of product IDs
-            order.ordered_products.set(ordered_product_ids)
+            request.session['address'] = address
+            request.session['phone_number'] = phone_number
+            request.session['city'] = city 
+            request.session['full_name'] = full_name
+            request.session['zip_code'] = zip_code
+            request.session['email'] = email
+            request.session['payment_method'] = payment_method
             
-            # Serialize the product quantity data to JSON and store it in the Order model
-            order.product_quantity = json.dumps(product_quantity)
-            payment_method = request.POST.get('payment_method')
-            order.payment_method = payment_method
-            order.save()
+            if payment_method == "cash_on_delivery":
+                
+                order = Order.objects.create(
+                user=request.user,
+                total_price=total_price,
+                address=address,
+                phone_number=phone_number,
+                city=city,
+                full_name=full_name,
+                zip_code=zip_code,
+                email=email,
+                payment_method = payment_method,
+                )
+                
+                request.session['order_id'] = order.order_id
+                
+                ordered_product_ids = []  # Initialize a list to store product IDs
+                # Create a dictionary to store product quantity data
+                product_quantity = {}
+                for cart_item in cart.cart_items.all():
+                    OrderItem.objects.create(order=order, cart_item=cart_item)
+                    product_quan = cart_item.quantity
+                    product_quantity[cart_item.product.id] = product_quan
+                    ordered_product_ids.append(cart_item.product.id)  # Add the product ID to the list
 
-            # Clear the cart
-            cart.cart_items.all().delete()
+                # Set the ordered_products field of the order to the list of product IDs
+                order.ordered_products.set(ordered_product_ids)
+            
+                # Serialize the product quantity data to JSON and store it in the Order model
+                order.product_quantity = json.dumps(product_quantity)
+                payment_method = request.POST.get('payment_method')
+                order.payment_method = payment_method
+                order.save()
 
-            # Update the inventory
-            for cart_item in cart.cart_items.all():
-                product = cart_item.product
-                product.inventory -= cart_item.quantity
-                product.save()
+                # Clear the cart
+                cart.cart_items.all().delete()
+
+                # Update the inventory
+                for cart_item in cart.cart_items.all():
+                    product = cart_item.product
+                    product.inventory -= cart_item.quantity
+                    product.save()
                 
                 
-                 # Send an order confirmation email
-            send_mail(
-                'Order Confirmation',
-                f'Your order with ID {order.order_id} has been placed successfully.',
-                'your@email.com',
-                [request.user.email],
-                fail_silently=False,
-            )
+                    # Send an order confirmation email
+                send_mail(
+                    'Order Confirmation',
+                    f'Your order with ID {order.order_id} has been placed successfully.',
+                    'your@email.com',
+                    [request.user.email],
+                    fail_silently=False,
+                )
 
-            payment_method = request.POST.get('payment_method')
-            if payment_method == 'cash_on_delivery':
                 # Redirect to the order confirmation page with a unique order ID.
-                return redirect('order_confirmation', order_id=order.id)
-            elif payment_method == 'online_payment':
+                return redirect('order_confirmation')
+            
+            if payment_method == 'online_payment':
                 # Redirect to your online payment view.
                 return redirect('payment')
             
@@ -480,9 +492,10 @@ def checkout(request):
 
 
 @login_required
-def order_confirmation(request, order_id):
-    order = Order.objects.get(id=order_id)
-    return render(request, 'order_confirmation.html', {'order': order})
+def order_confirmation(request):
+
+    
+    return render(request, 'order_confirmation.html')
 
 
 
@@ -606,11 +619,14 @@ def customer_orders(request):
 from django.shortcuts import render
 from django.http import JsonResponse
 import stripe
-from django.conf import settings
+from django.conf import Settings, settings
 from djstripe.models import PaymentIntent
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def payment_view(request):
     total_price = request.session.get('total_price')
+    
     
     if not total_price:
         # Handle the case where total_price is not set in the session
@@ -622,19 +638,26 @@ def payment_view(request):
         intent = stripe.PaymentIntent.create(
             amount=int(total_price), 
             currency='usd',
-            metadata={'integration_check': 'accept_a_payment'},
+            metadata={'integration_check': 'accept_a_payment',
+                      'address' : request.session.get('address'),
+                      'phone_number' : request.session.get('phone_number'),
+                      'full_name' : request.session.get('full_name'),
+                      'email' : request.session.get('email'),
+                      'city' : request.session.get('city'),
+                      'payment_method' : request.session.get('payment_method'),
+                      'zip_code' : request.session.get('zip_code'),
+                      'user_id' : request.user.id,
+                      'total_price' : request.session.get('total_price'),
+                      },
         )
         client_secret = intent.client_secret
         
         # Save the PaymentIntent in your database for later retrieval
         PaymentIntent.sync_from_stripe_data(intent)
         
-        if intent.status == 'succeeded':
-            pass
-        
         context = {"client_secret": client_secret, "amount": total_price}
 
-        return redirect(request, 'payment.html', context)
+        return render(request, 'payment.html', context)
         
 
     except stripe.error.StripeError as e:
@@ -642,21 +665,50 @@ def payment_view(request):
 
 
 
-# views.py
 
-from django.http import HttpResponse
-from djstripe import webhooks
+def success_view(request):
+    return render(request, 'success.html')
+
+
+
 
 @webhooks.handler("payment_intent.succeeded")
-def payment_intent_succeeded(request, payload):
-    # Payment succeeded, handle accordingly
-    return HttpResponse(status=200)
+def handle_payment_succeeded(event, **kwargs):
+    # Extract necessary information from 'event' object
+    payment_intent = event.data.get("object", {})
+    metadata = payment_intent.get("metadata", {})
+    payment_method = metadata.get("payment_method")
+    address = metadata.get("address")
+    phone_number = metadata.get("phone_number")
+    zip_code = metadata.get("zip_code")
+    full_name = metadata.get("full_name")
+    email = metadata.get("email")
+    city = metadata.get("city")
+    user_id = metadata.get("user_id")
+    total_price = metadata.get("total_price")
+    
+    if user_id:
+        # Send the custom signal with the necessary information
+        payment_succeeded.send(
+            sender=None,
+            user_id=user_id,
+            total_price=total_price,
+            address=address,
+            phone_number=phone_number,
+            city=city,
+            full_name=full_name,
+            zip_code=zip_code,
+            email=email,
+            payment_method=payment_method,
+        )
+        
+   
+    
+        
 
 @webhooks.handler("payment_intent.payment_failed")
-def payment_intent_payment_failed(request, payload):
-    # Payment failed, handle accordingly
-    return HttpResponse(status=200)
-
-
-
-
+def handle_payment_failed(event, **kwargs):
+    # Logic for failed payment
+    # Extract necessary information from 'event' object using payment_intent_id
+    print("Payment Failed for Payment Intent")
+    # Handle failed payment scenarios such as notifying the user or taking fallback actions

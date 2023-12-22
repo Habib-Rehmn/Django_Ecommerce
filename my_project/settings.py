@@ -236,5 +236,6 @@ STRIPE_SECRET_KEY = 'sk_test_51OAs16BcjQz7F5SUVrizDWZOgYVHHMULYJ6bdEnrYfb1ORh3D5
 
 STRIPE_TEST_SECRET_KEY = "sk_test_51OAs16BcjQz7F5SUVrizDWZOgYVHHMULYJ6bdEnrYfb1ORh3D5KzDawXEq2CD7FMTkBsU3wAjGfne7CynaoGEDeb00ZSUkOzYc"
 STRIPE_LIVE_MODE = False  # Change to True in production
-DJSTRIPE_WEBHOOK_SECRET = "whsec_B2s8G4mPvN33cMkz0UIsRoUjkBe0XR2M"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
+DJSTRIPE_WEBHOOK_SECRET = "whsec_B2s8G4mPvN33cMkz0UIsRoUjkBe0XR2M"
+STRIPE_ENDPOINT_SECRET = "whsec_B2s8G4mPvN33cMkz0UIsRoUjkBe0XR2M"
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
